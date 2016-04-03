@@ -1,3 +1,4 @@
+import java.io.IOException;
 import java.util.Scanner;
 
 /**
@@ -9,7 +10,7 @@ public class Main {
         String input = "";
         Scanner scanner = new Scanner(System.in);
         while (!input.equals("end")) {
-            System.out.println("Input yo stuff");
+            System.out.print("Input a number:");
             input = scanner.nextLine();
             tree.insert(Integer.parseInt(input));
             tree.printTree();
