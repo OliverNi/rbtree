@@ -10,10 +10,16 @@ public class Main {
         String input = "";
         Scanner scanner = new Scanner(System.in);
         while (!input.equals("end")) {
-            System.out.print("Input a number:");
+            System.out.print("Input an operation and argument:");
             input = scanner.nextLine();
-            tree.insert(Integer.parseInt(input));
-            tree.printTree();
+            String op[] = input.split(" ");
+            if (op[0].equals("in")){
+                tree.insert(Integer.parseInt(op[1]));
+                tree.printTree();
+            } else if (op[0].equals("rankk")){
+                System.out.println("rank: " + tree.osKeyRank(tree.getRoot(), Integer.parseInt(op[1])) + "\n");
+                tree.printTree();
+            }
         }
     }
 }

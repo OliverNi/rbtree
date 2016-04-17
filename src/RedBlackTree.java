@@ -7,6 +7,9 @@ public class RedBlackTree<T extends Comparable> {
     private int height = 4;
     private int nrOfNodes = 0;
 
+    public Node getRoot() {
+        return root;
+    }
 
     public RedBlackTree() {
         NIL = new Node();
@@ -22,13 +25,18 @@ public class RedBlackTree<T extends Comparable> {
         this.height = height;
         this.nrOfNodes = nrOfNodes;
     }
+        else {
+            x.getParent().setRight(y);
+        }
+
 
     public void insert(T element){
         Node y = NIL;
         Node x = root;
         while (x != NIL){
             y = x;
-            if (element.compareTo(x.getElement()) < 0){
+            x.incSize();
+            if (element.compareTo(x.getElement()) < 0){ //element - x.getElement() < 0 -> if (element < x.getElement)
                 x = x.getLeft();
             }
             else {
@@ -38,6 +46,7 @@ public class RedBlackTree<T extends Comparable> {
         Node z = new Node(y, NIL, NIL, element);
         if (y == NIL){
             root = z;
+            z.setSize(1);
         }
         else if (z.getElement().compareTo(y.getElement()) < 0){
             y.setLeft(z);
@@ -117,6 +126,8 @@ public class RedBlackTree<T extends Comparable> {
 
         y.setLeft(x);
         x.setParent(y);
+        y.setSize(x.getSize());
+        x.setSize(x.getLeft().getSize() + x.getRight().getSize() + 1);
     }
 
     private void rightRotate(Node x){
@@ -135,12 +146,77 @@ public class RedBlackTree<T extends Comparable> {
         else if (x == x.getParent().getLeft()){
             x.getParent().setLeft(y);
         }
-        else {
-            x.getParent().setRight(y);
-        }
-
         y.setRight(x);
         x.setParent(y);
+        y.setSize(x.getSize());
+        x.setSize(x.getLeft().getSize() + x.getRight().getSize() + 1);
+    }
+
+    /**
+     * Return the value of the tree stored at the specified rank starting from the root
+     * @param rank the element's rank in the tree
+     * @return the element
+     */
+    public T osSelect(int rank){
+        return osSelect(root, rank);
+    }
+
+    /**
+     * Return the value of the tree stored at the specified rank starting from node x
+     * @param x starting node (root of subtree)
+     * @param rank the element's rank in the tree
+     * @return the element
+     */
+    public T osSelect(Node x, int rank){
+        int r = x.getLeft().getSize();
+        if (rank == r){
+            return x.getElement();
+        }
+        else if (rank < r){
+            return osSelect(x.getLeft(), rank);
+        }
+        else {
+            return osSelect(x.getRight(), rank - r);
+        }
+    }
+
+    public int osRank(Node x){
+        int r = x.getLeft().getSize() + 1;
+        Node y = x;
+        while (y != x){
+            if (y == y.getParent().getRight()){
+                r = r + y.getLeft().getSize() + 1;
+            }
+            y = y.getParent();
+        }
+        return r;
+    }
+
+    public int osKeyRank(Node x, T elem){
+        if (x == NIL){
+            return -1;
+        }
+        else if (elem.compareTo(x.getElement()) < 0){ //element - x.getElement() < 0 -> if (element < x.getElement)
+            int rank = osKeyRank(x.getLeft(), elem);
+            if (rank != -1){
+                return rank;
+            }
+            else {
+                return -1;
+            }
+        }
+        else if (elem.compareTo(x.getElement()) > 0){
+            int rank = osKeyRank(x.getRight(), elem);
+            if (rank != -1){
+                return rank + x.getLeft().getSize() + 1;
+            }
+            else {
+                return -1;
+            }
+        }
+        else {
+            return x.getLeft().getSize() + 1;
+        }
     }
 
     public void printTree(){
@@ -157,14 +233,14 @@ public class RedBlackTree<T extends Comparable> {
             for(int i=0;i<level-1;i++)
                 System.out.print("|\t\t");
             if (!root.isBlack) {
-                System.out.println("|-------\033[31m" + root.getElement() + "\033[37m");
+                System.out.println("|-------\033[31m" + root.getElement() + "\033[37m-" + root.getSize());
             }
             else {
-                System.out.println("|-------" + root.getElement());
+                System.out.println("|-------" + root.getElement() + "-" + root.getSize());
             }
         }
         else
-            System.out.println(root.getElement());
+            System.out.println(root.getElement() + "-" + root.getSize());
         printBinaryTree(root.getLeft(), level+1);
     }
     public class Node {
@@ -173,6 +249,7 @@ public class RedBlackTree<T extends Comparable> {
         private Node right;
         private boolean isBlack;
         private T element;
+        private int size;
 
         public Node() {
             parent = NIL;
@@ -180,6 +257,7 @@ public class RedBlackTree<T extends Comparable> {
             right = NIL;
             isBlack = true;
             element = null;
+            size = 0;
         }
 
         public Node(Node parent, Node left, Node right, T element) {
@@ -188,6 +266,19 @@ public class RedBlackTree<T extends Comparable> {
             this.right = right;
             this.isBlack = false;
             this.element = element;
+            this.size = 1;
+        }
+
+        public int getSize() {
+            return size;
+        }
+
+        public void setSize(int size) {
+            this.size = size;
+        }
+
+        public void incSize(){
+            size++;
         }
 
         public Node getParent() {
